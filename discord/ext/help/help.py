@@ -143,7 +143,7 @@ class Help(discord.Cog):
             if isinstance(c, discord.SlashCommandGroup):
                 for sub_c in c.subcommands:
                     elements.append(
-                        HelpElement(cmd_name=f'/{sub_c.name}', description=sub_c.description or '\u200b')
+                        HelpElement(cmd_name=f'/{sub_c.qualified_name}', description=sub_c.description or '\u200b')
                     )    
             else:
                 elements.append(
