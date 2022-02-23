@@ -139,9 +139,16 @@ class Help(discord.Cog):
         elements = []
         for k in cmds:
             c = cmds[k]
-            elements.append(
-                HelpElement(cmd_name=f'/{c.name}', description=c.description)
-            )
+
+            if isinstance(c, discord.SlashCommandGroup):
+                for sub_c in c.subcommands:
+                    elements.append(
+                        HelpElement(cmd_name=f'/{sub_c.name}', description=sub_c.description or '\u200b')
+                    )    
+            else:
+                elements.append(
+                    HelpElement(cmd_name=f'/{c.name}', description=c.description or '\u200b')
+                )
 
         page = HelpPage(
             name='overview',
@@ -297,7 +304,7 @@ class Help(discord.Cog):
                     discord.ui.Button(
                         style=discord.ButtonStyle.link,
                         label='Github Issue',
-                        url=Help.github_url
+                        url=f'{Help.github_url}/issues'
                     )
                 )
 
