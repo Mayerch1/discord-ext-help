@@ -1,7 +1,7 @@
 import discord
 import logging
 
-log = logging.getLogger('ext.Help')
+log = logging.getLogger('ext.help')
 
 
 class HelpException(Exception):
@@ -9,13 +9,13 @@ class HelpException(Exception):
 
 
 class HelpElement:
-    def __init__(self, cmd_name, description):
+    def __init__(self, cmd_name: str, description: str):
         self.cmd_name =  cmd_name
         self.help = description
 
 
 class HelpPage:
-    def __init__(self, name, title, emoji=None, description:str = None, elements:list[HelpElement] = [], override_footer:str = None):
+    def __init__(self, name: str, title: str, emoji=None, description:str = None, elements:list[HelpElement] = [], override_footer:str = None):
         self.name=name
         self.title = title
         self.emoji = emoji
@@ -80,6 +80,7 @@ class Help(discord.Cog):
     feedback_mention = None
     permissions = discord.Permissions()
     support_url = None
+    github_url = None
     tos_text = None
     privacy_text = None
     default_footer = None
@@ -251,6 +252,14 @@ class Help(discord.Cog):
             Help.cog_class.default_footer = default_footer
 
 
+    @staticmethod
+    def set_github_url(github_url:str):
+        if Help.is_cog_scope:
+            Help.github_url = github_url
+        else:
+            Help.cog_class.github_url = github_url
+
+
     # =====================
     # help stuff
     # =====================
@@ -272,30 +281,48 @@ class Help(discord.Cog):
         def _error_components():
             view = discord.ui.View(timeout=None)
             
-            buttons = [
-                discord.ui.Button(
-                    style=discord.ButtonStyle.link,
-                    label='Support Server',
-                    url='https://discord.gg/Xpyb9DX3D6'
-                ),
-                discord.ui.Button(
-                    style=discord.ButtonStyle.link,
-                    label='Github Issue',
-                    url='https://github.com/Mayerch1/FuelBot/issues'
+            buttons = []
+
+            if Help.support_url:
+                buttons.append(
+                    discord.ui.Button(
+                        style=discord.ButtonStyle.link,
+                        label='Support Server',
+                        url=Help.support_url
+                    )
                 )
-            ]
-            for b in buttons:
-                view.add_item(b)
-            return view
+
+            if Help.github_url:
+                buttons.append(
+                    discord.ui.Button(
+                        style=discord.ButtonStyle.link,
+                        label='Github Issue',
+                        url=Help.github_url
+                    )
+                )
+
+            if buttons:
+                for b in buttons:
+                    view.add_item(b)
+                return view
+            else:
+                return None
 
         def _error_text():
             return 'There was an issue while saving your feedback.\n'\
                 'Please report this bug on the *support server* or on *GitHub*'
 
+        async def send_error(interaction: discord.Interaction):
+            error_view = _error_components()
+            if error_view:
+                await interaction.response.send_message(content=_error_text(), view=error_view, ephemeral=True)
+            else:
+                await interaction.response.send_message(content=_error_text(), ephemeral=True)
+
         try:
             ch = await self.client.fetch_channel(Help.feedback_ch)
         except (discord.errors.Forbidden, discord.errors.NotFound) as ex:
-            await interaction.response.send_message(content=_error_text(), view=_error_components(), ephemeral=True)
+            await send_error(interaction)
             log.error('failed to fetch feedback channel', exc_info=ex)
             raise ex
 
@@ -309,7 +336,7 @@ class Help(discord.Cog):
         try:
             await ch.send(feedback_str)
         except discord.errors.Forbidden as ex:
-            await interaction.response.send_message(content=_error_text(), view=_error_components(), ephemeral=True)
+            await send_error(interaction)
             log.error('failed to send message into feedback channel', exc_info=ex)
             raise ex
 

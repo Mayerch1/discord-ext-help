@@ -70,3 +70,97 @@ page = HelpPage(
 )
 Help.add_page(page)
 ```
+
+
+## List of settings
+
+```py
+Help.init_help(bot, auto_detect_commands=True) # must be called first, but after .load_extension
+```
+Initialize the Bot, must be called after `.load_extension` but before `bot.run(...)`.
+On `auto_detect_commands`, the bot will try to index existing slash commands. For this to work, 
+the module is best loaded at last.
+
+
+```py
+Help.add_page(page: HelpPage, make_default=False)
+```
+Add a new page to the Help Menu, optionally make it the new default page.
+
+
+```py
+Help.set_default_footer(default_footer:str)
+```
+Set the default footer at the bottom of each help page. Can be override in custom pages
+
+
+```py
+Help.set_feedback(channel_id: int, role_id: int)
+```
+Set the `channel_id` of a feedback channel, direct feedback is redirected to.
+The bot must have access to `channel_id`. 
+
+If `role_id` is specified, it is used as mentionwith every feedback.
+
+
+
+```py
+Help.invite_permissions(permissions: discord.Permissions)
+```
+Set the permissions required by this bot. This is used to generate the invite url
+
+
+```py
+Help.support_invite(link: str)
+```
+Invite link for your bot support server.
+
+
+```
+Help.set_tos_text(text: str)
+```
+The text which is shown when the `ToS` Button is presesd
+
+
+```
+Help.set_privacy_text(text: str)
+```
+The text which is shown when the `Privacy` Button is presesd
+
+```
+Help.set_tos_file(file: str)
+```
+Identical to `set_tos_text`, but the text is read from a file.
+
+```
+Help.set_privacy_file(file: str)
+```
+Identical to `set_privacy_text`, but the text is read from a file.
+
+```
+Help.set_github_url(github_url:str)
+```
+Set the repository url for the bot. This is used as a secondary support link
+(in addition to the `support_invite`)
+
+## Create custom pages
+
+
+Each Page is initialized as follows
+```py
+class HelpPage:
+    def __init__(self, name: str, title: str, emoji=None, description:str = None, elements:list[HelpElement] = [], override_footer:str = None):
+        pass
+```
+The name is used as reference in the pagination and must be unique. The emoji can optionally be specified for prettier pagination.
+
+All other attributes correspond to the same embed attributes.
+
+
+```py
+class HelpElement:
+    def __init__(self, cmd_name: str, description: str):
+        pass
+```
+Each subelement is represented as field in an embed.
+The content must not necessarily describe a command.
