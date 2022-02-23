@@ -439,7 +439,7 @@ class Help(discord.Cog):
     # =====================
     # command functions
     # =====================
-    @discord.slash_command(name='help', description='Show the help page for this bot', guild_ids=[140150091607441408])
+    @discord.slash_command(name='help', description='Show the help page for this bot')
     async def help(self, ctx: discord.ApplicationContext):
         await self.send_help_page(ctx, page=Help.default_page_name)
 
