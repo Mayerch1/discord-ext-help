@@ -37,7 +37,7 @@ class HelpPage:
     def to_option(self, current_page=None) -> discord.SelectOption:
         return discord.SelectOption(
             label=f'{self.name.title()} Page',
-            description=self.description,
+            description=self.description[0:100],
             value=self.name,
             emoji=self.emoji,
             default=(self.name == current_page)
